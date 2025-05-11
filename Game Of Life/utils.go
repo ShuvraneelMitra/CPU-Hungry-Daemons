@@ -7,6 +7,10 @@ import (
 	"os"
 )
 
+func is_valid(board [][]Cell, row, col int) bool {
+	return 0 <= row && row < len(board) && 0 <= col && col < len(board[0])
+}
+
 func getIcon() image.Image {
 	iconFile, err := os.Open("logo.png")
 	if err != nil {
