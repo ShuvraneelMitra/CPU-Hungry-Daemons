@@ -128,9 +128,9 @@ func run() {
 			rect.Color = pixel.RGB(1, 1, 1)
 
 			/*
-			Interesting thing is that you do not need to specify all the 4 points of
-			the rectangle: a fact that I overlooked in the first attempt and only 
-			discovered it serendipitously. Read the documentation, folks.
+				Interesting thing is that you do not need to specify all the 4 points of
+				the rectangle: a fact that I overlooked in the first attempt and only
+				discovered it serendipitously. Read the documentation, folks.
 			*/
 			rect.Push(pixel.V(cur_board[row][col].lower_left.X, cur_board[row][col].lower_left.Y))
 			rect.Push(pixel.V(cur_board[row][col].lower_left.X+cur_board[row][col].length, cur_board[row][col].lower_left.Y+cur_board[row][col].length))
@@ -143,7 +143,7 @@ func run() {
 	for row := range next_board {
 		for col := range next_board[row] {
 			r := rand.Float64()
-			if 0.00 <= r && r <= 0.25 {
+			if 0.00 <= r && r <= 0.10 {
 				next_board[row][col].germinate()
 			}
 		}
