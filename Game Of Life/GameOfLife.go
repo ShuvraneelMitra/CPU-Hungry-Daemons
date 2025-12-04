@@ -77,6 +77,12 @@ func process(cur_board [][]Cell, row, col int, next_board [][]Cell, wg *sync.Wai
 		next_board[row][col].depart_this_life()
 	} else if count == 3 && cur_board[row][col].state == DEAD {
 		next_board[row][col].germinate()
+	} else {
+		if cur_board[row][col].state == ALIVE {
+			next_board[row][col].germinate()
+		} else {
+			next_board[row][col].depart_this_life()
+		}
 	}
 }
 
@@ -139,9 +145,16 @@ func run() {
 	}
 
 	// Random Initialisation
-	next_board := cur_board
-	for row := range next_board {
-		for col := range next_board[row] {
+	next_board := make([][]Cell, int(n))
+	for i := range next_board {
+		next_board[i] = make([]Cell, int(n))
+		for j := range next_board[i] {
+			next_board[i][j] = cur_board[i][j] // copy values
+		}
+	}
+
+	for row := range cur_board {
+		for col := range cur_board[row] {
 			r := rand.Float64()
 			if 0.00 <= r && r <= 0.10 {
 				next_board[row][col].germinate()
@@ -153,7 +166,7 @@ func run() {
 	for !win.Closed() {
 		win.Clear(colornames.Skyblue)
 
-		cur_board = next_board
+		cur_board, next_board = next_board, cur_board
 
 		/*
 			Because we are inevitably going to have a large number of cells, I thought
