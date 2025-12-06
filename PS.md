@@ -1,4 +1,4 @@
-### **Problem Statement: Digital Evolution Simulator ("Self-Replicating Code Organisms")**  
+# **Problem Statement: Digital Evolution Simulator ("Self-Replicating Code Organisms")**  
 
 #### **Objective**  
 Create a **closed computational ecosystem** where self-replicating, mutating **goroutines** ("digital organisms") compete for limited system resources (CPU, memory), evolve over time, and exhibit emergent behaviors such as parasitism, cooperation, or optimization.  

@@ -1,10 +1,14 @@
 package main
 
+/*
+The program as it is currently written does not support values of n greater than 120-ish
+*/
+
 import (
 	"fmt"
 	"math/rand"
 	"sync"
-	"time"
+	// "time"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
@@ -65,7 +69,7 @@ func process(cur_board [][]Cell, row, col int, next_board [][]Cell, wg *sync.Wai
 	dx := [8]int{-1, -1, -1, 0, 1, 1, 1, 0}
 
 	count := 0
-	for i := range 8 {
+	for i := range dx {
 		var nrow int = row + dx[i]
 		var ncol int = col + dy[i]
 		if is_valid(cur_board, nrow, ncol) {
@@ -90,6 +94,12 @@ func run() {
 	var n float64
 	fmt.Print("Enter the number of cells ")
 	fmt.Scan(&n)
+	var INIT_PROPORTION_FILLED float64
+	if n < 30{
+		INIT_PROPORTION_FILLED = 0.20
+	} else{
+		INIT_PROPORTION_FILLED = 0.10
+	}
 
 	cfg := pixelgl.WindowConfig{
 		Title:     "Game of Life",
@@ -144,19 +154,28 @@ func run() {
 		}
 	}
 
-	// Random Initialisation
+	// Deep copy of cur_board slice 
 	next_board := make([][]Cell, int(n))
-	for i := range next_board {
-		next_board[i] = make([]Cell, int(n))
-		for j := range next_board[i] {
-			next_board[i][j] = cur_board[i][j] // copy values
+	for row := range next_board {
+		next_board[row] = make([]Cell, int(n))
+		for col := range next_board[row] {
+			next_board[row][col].lower_left = cur_board[row][col].lower_left
+			next_board[row][col].length = cur_board[row][col].length
+			next_board[row][col].rect = imdraw.New(nil)
+			next_board[row][col].state = DEAD
+			rect := next_board[row][col].rect
+			rect.Color = pixel.RGB(1, 1, 1)
+			rect.Push(pixel.V(next_board[row][col].lower_left.X, next_board[row][col].lower_left.Y))
+			rect.Push(pixel.V(next_board[row][col].lower_left.X+next_board[row][col].length, 
+				next_board[row][col].lower_left.Y+next_board[row][col].length))
+			rect.Rectangle(0.5)
 		}
 	}
 
 	for row := range cur_board {
 		for col := range cur_board[row] {
 			r := rand.Float64()
-			if 0.00 <= r && r <= 0.10 {
+			if 0.00 <= r && r <= INIT_PROPORTION_FILLED {
 				next_board[row][col].germinate()
 			}
 		}
@@ -182,15 +201,23 @@ func run() {
 		}
 		wg.Wait()
 
+		var draw_wg sync.WaitGroup
 		im_draw.Draw(win)
 		for row := range cur_board {
 			for col := range cur_board[row] {
-				cell := cur_board[row][col]
-				cell.rect.Draw(win)
+				draw_wg.Add(1)
+				go func(){
+					defer draw_wg.Done()
+					cell := cur_board[row][col]
+					cell.rect.Draw(win)
+				}()
 			}
 		}
+		draw_wg.Wait()
+
 		win.Update()
-		time.Sleep(400 * time.Millisecond)
+		// time.Sleep(50 * time.Millisecond) 
+		//Uncomment the above line for better visualization for small values of n
 	}
 }
 
