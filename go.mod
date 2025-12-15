@@ -1,4 +1,4 @@
-module hungry-daemons/gui
+module github.com/ShuvraneelMitra/hungry-daemons
 
 go 1.24.3
 
