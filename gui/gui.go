@@ -1,13 +1,8 @@
 package gui
 
 import (
-	// "image/color"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	// "fyne.io/fyne/v2/container"
-	// "fyne.io/fyne/v2/canvas"
-	// "fyne.io/fyne/v2/layout"
 )
 
 const (
@@ -24,9 +19,10 @@ func Run() {
 	screen := newApp.Driver().AllWindows()[0]
 	screen.CenterOnScreen()
 
-	content := getLayout()
+	layout := getLayout()
 
-	win.SetContent(content)
+	win.SetContent(layout.view)
+	updateTime(layout)
 
 	win.ShowAndRun()
 }

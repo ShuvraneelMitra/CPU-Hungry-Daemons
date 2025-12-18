@@ -8,6 +8,11 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+const (
+	HEADING_TO_BODY = 1.2
+)
+var LAVENDER = color.NRGBA{R: 167, G: 143, B: 255, A: 255}
+
 //------------------------------------------ SIDEBAR THEME -------------------------------------------------
 type SidebarTheme struct {
 }
