@@ -23,6 +23,7 @@ func Run() {
 
 	win.SetContent(layout.view)
 	updateTime(layout)
+	updateStatus(layout)
 
 	win.ShowAndRun()
 }
