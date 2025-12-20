@@ -1,6 +1,7 @@
 package profiler
 
 import (
+	"fmt"
 	"log"
 	"runtime"
 	"sync"
@@ -8,7 +9,9 @@ import (
 )
 
 type Metadata struct {
+	Timestamp time.Time
 	truncated bool
+	numGoroutines int
 	stackDump []byte
 }
 
@@ -59,18 +62,20 @@ func (sampler *GoRoutineSampler) Sample(stop <-chan any) <-chan Metadata {
 	dataStream := make(chan Metadata, sampler.MAX_CHANNEL_SIZE)
 
 	go func() {
+		defer close(dataStream)
 		ticker := time.NewTicker(time.Second / time.Duration(sampler.sampling_f))
 		defer ticker.Stop()
 
 		for {
 			select {
 			case <-stop:
-				close(dataStream)
 				return 
 			case <-ticker.C: // ticker.C is an unbuffered channel
 				metadata := Metadata{
+					Timestamp: time.Now(),
 					truncated: false,
 					stackDump: make([]byte, 1 << 10), // start off with 1 kB
+					numGoroutines: runtime.NumGoroutine(),
 				}
 				for {
 					n := runtime.Stack(metadata.stackDump, true)
@@ -109,6 +114,8 @@ func (sampler *GoRoutineSampler) Sample(stop <-chan any) <-chan Metadata {
 				sampler.mtx.Lock()
 				sampler.TotalSamples += 1
 				sampler.mtx.Unlock()
+
+				fmt.Println("Total Number of samples: ", sampler.TotalSamples)
 			}
 		}
 	}()
