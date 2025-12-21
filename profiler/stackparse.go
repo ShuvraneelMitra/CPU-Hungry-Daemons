@@ -129,7 +129,7 @@ func Parse(stop <-chan any, dataStream <-chan Metadata) <-chan Sample {
 				if ok == false {
 					return
 				}
-				fmt.Println("Received metadata!")
+
 				sample := NewSample(metadata.Timestamp, metadata.numGoroutines)
 				var cur_state ParserState
 				next_state := StateHeading
