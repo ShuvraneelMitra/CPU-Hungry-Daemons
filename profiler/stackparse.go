@@ -36,6 +36,7 @@ const (
 	RUNNING GoRoutineState = iota
 	RUNNABLE
 
+	// Do not reorder this enum! If you want to add states please append to the bottom, after DEAD.
 	BLOCK_SLEEP // 2
 	BLOCK_CHAN_SEND
 	BLOCK_CHAN_RCV
@@ -66,9 +67,7 @@ var stateMap = map[string]GoRoutineState{
 	"sync.WaitGroup.Wait": WAIT,
 	"time.Sleep": SLEEP,
 	"IO wait": BLOCK_IO,
-	"GC assist wait": GC,
-	"GC sweep wait": GC,
-	"GC worker (idle)": GC,
+	"GC": GC,
 	"finalizer wait": WAIT,
 }
 
@@ -101,7 +100,7 @@ const (
 	StateCreatedByFunc
 	StateCreatedByAddr
 )
-const NUM_PARSER_STATES = 5
+const NUM_PARSER_STATES int = 5
 
 func NewSample(t time.Time, nGo int) *Sample {
 	return &Sample{
@@ -262,6 +261,12 @@ func parseHeading(sample *Sample, line []byte) bool {
 	
 	idx_open := bytes.LastIndex(line, []byte("["))
 	idx_close := bytes.LastIndex(line, []byte("]"))
+
+	if idx_open == -1 || idx_close == -1 {
+		fmt.Println("[STACK PARSER] Cannot find the goroutine state in header")
+		return false
+	}
+
 	stateString := line[idx_open + 1 : idx_close]
 
 	newGoRoutine.State = stateMap[string(firstWord(stateString))]
@@ -340,7 +345,7 @@ func parseCreatedByFunc(sample *Sample, line []byte) bool {
 	}
 	latestGoRoutine := &sample.List[len(sample.List) - 1]
 
-	latestGoRoutine.CreatedBy.File = string(createdBy)
+	latestGoRoutine.CreatedBy.Func = string(createdBy)
 	return true
 }
 
@@ -397,4 +402,8 @@ line. Then if we encounter a state which has already been visited, there is no p
 executing further because the processing function as well as the file contents, are 
 deterministic and will give us the same cycle of states, over and over.  
 Thus when we arrive at a previously visited state we just abort processing for that line. 
+
+11:30 PM -- 
+Just checked the DataDog/gostackparse repo once more: the parser file is almost the same 
+length for both our implementations. That's a pretty cool fact for me :3
 */
