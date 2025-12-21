@@ -1,7 +1,6 @@
 package profiler
 
 import (
-	"fmt"
 	"log"
 	"runtime"
 	"sync"
@@ -49,7 +48,7 @@ type GoRoutineSampler struct {
 func NewGoRoutineSampler() *GoRoutineSampler {
 	return &GoRoutineSampler{
 		sampling_f: 0,
-		MAX_BUFFER_SIZE: 1 << 10,
+		MAX_BUFFER_SIZE: 1 << 30, // DEFAULT: 1 GB
 		MAX_CHANNEL_SIZE: 100,
 	}
 }
@@ -74,7 +73,7 @@ func (sampler *GoRoutineSampler) Sample(stop <-chan any) <-chan Metadata {
 				metadata := Metadata{
 					Timestamp: time.Now(),
 					truncated: false,
-					stackDump: make([]byte, 1 << 10), // start off with 1 kB
+					stackDump: make([]byte, 5 * (1 << 20)), // start off with 1 kB. NO. 1 kB is too less. Give 5 MB
 					numGoroutines: runtime.NumGoroutine(),
 				}
 				for {
@@ -114,8 +113,6 @@ func (sampler *GoRoutineSampler) Sample(stop <-chan any) <-chan Metadata {
 				sampler.mtx.Lock()
 				sampler.TotalSamples += 1
 				sampler.mtx.Unlock()
-
-				fmt.Println("Total Number of samples: ", sampler.TotalSamples)
 			}
 		}
 	}()
